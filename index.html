@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oink Rice - POS Kasir Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: #7f1212;
+            /* GANTI NAMA FILE FOTO KAMU DI DALAM TANDA PETIK DI BAWAH INI */
+            background-image: url('BG OINK.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+        .glass-box { 
+            background: rgba(255, 255, 255, 0.96); 
+            backdrop-filter: blur(12px); 
+        }
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+    </style>
+</head>
+<body class="p-3 sm:p-6 min-h-screen flex items-center justify-center">
+
+    <div class="w-full max-w-2xl glass-box rounded-3xl p-5 sm:p-7 shadow-2xl space-y-5 text-gray-800 border border-amber-500/40 my-4">
+        
+        <!-- HEADER KASIR & NAVIGASI -->
+        <div class="flex items-center justify-between border-b pb-3.5 border-gray-200">
+            <div class="flex items-center space-x-2.5">
+                <img src="logo-oinkrice.png" alt="Logo Oink Rice" class="w-10 h-10 rounded-full object-cover shadow border border-amber-400/50">
+                <div>
+                    <h1 class="font-extrabold text-base sm:text-lg text-gray-900 leading-none">OINK RICE POS</h1>
+                    <p class="text-[10px] sm:text-xs text-gray-500 font-bold tracking-wider mt-0.5">Sistem Kasir & Operasional Dapur</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-1.5">
+                <button type="button" onclick="openHistoryModal()" class="px-2.5 py-1.5 bg-gray-800 hover:bg-gray-900 text-white text-xs font-black rounded-xl transition shadow flex items-center space-x-1">
+                    <i class="fa-solid fa-list-check"></i>
+                    <span>Riwayat</span>
+                </button>
+                <button type="button" onclick="openReportsModal()" class="px-2.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-xs font-black rounded-xl transition shadow flex items-center space-x-1">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span>Omzet</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- STEP 1: PILIH MENU & JUMLAH -->
+        <div class="space-y-2">
+            <div class="flex items-center justify-between">
+                <label class="block text-xs font-extrabold text-gray-700 tracking-wider">1. PILIH MENU & JUMLAH</label>
+                <button type="button" onclick="resetItems()" class="text-xs text-red-600 font-bold hover:underline">Reset Pilihan</button>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2 sm:gap-3">
+                <!-- MENU 1: OINK BOWL -->
+                <div class="p-2.5 sm:p-3.5 bg-gray-50 border border-gray-200 rounded-2xl text-center flex flex-col justify-between min-h-[130px] shadow-sm">
+                    <div>
+                        <span class="font-black text-xs sm:text-sm text-gray-900 block leading-tight">Oink Bowl</span>
+                        <span class="text-xs font-bold text-red-700 block mt-0.5">40k</span>
+                    </div>
+                    <div class="mt-2 flex items-center justify-center space-x-1">
+                        <button type="button" onclick="changeQty('bowl', -1)" class="w-6 h-6 sm:w-7 sm:h-7 bg-red-100 text-red-800 font-black rounded-xl text-xs hover:bg-red-200 transition">-</button>
+                        <input type="number" id="input-bowl" value="0" min="0" oninput="manualQty('bowl')" class="w-9 sm:w-11 text-center font-black text-xs sm:text-sm bg-white border border-gray-300 rounded-xl py-0.5 focus:outline-none focus:ring-1 focus:ring-red-500">
+                        <button type="button" onclick="changeQty('bowl', 1)" class="w-6 h-6 sm:w-7 sm:h-7 bg-red-700 text-white font-black rounded-xl text-xs hover:bg-red-800 transition">+</button>
+                    </div>
+                </div>
+
+                <!-- MENU 2: OINK PACK -->
+                <div class="p-2.5 sm:p-3.5 bg-gray-50 border border-gray-200 rounded-2xl text-center flex flex-col justify-between min-h-[130px] shadow-sm">
+                    <div>
+                        <span class="font-black text-xs sm:text-sm text-gray-900 block leading-tight">Oink Pack</span>
+                        <span class="text-xs font-bold text-red-700 block mt-0.5">100k</span>
+                    </div>
+                    <div class="mt-2 flex items-center justify-center space-x-1">
+                        <button type="button" onclick="changeQty('pack', -1)" class="w-6 h-6 sm:w-7 sm:h-7 bg-red-100 text-red-800 font-black rounded-xl text-xs hover:bg-red-200 transition">-</button>
+                        <input type="number" id="input-pack" value="0" min="0" oninput="manualQty('pack')" class="w-9 sm:w-11 text-center font-black text-xs sm:text-sm bg-white border border-gray-300 rounded-xl py-0.5 focus:outline-none focus:ring-1 focus:ring-red-500">
+                        <button type="button" onclick="changeQty('pack', 1)" class="w-6 h-6 sm:w-7 sm:h-7 bg-red-700 text-white font-black rounded-xl text-xs hover:bg-red-800 transition">+</button>
+                    </div>
+                </div>
+
+                <!-- MENU 3: 1 KG FAMILY PACK -->
+                <div class="p-2.5 sm:p-3.5 bg-gray-50 border border-gray-200 rounded-2xl text-center flex flex-col justify-between min-h-[130px] shadow-sm">
+                    <div>
+                        <span class="font-black text-xs sm:text-sm text-gray-900 block leading-tight">1 KG Family</span>
+                        <span class="text-xs font-bold text-amber-700 block mt-0.5">167k (H-4)</span>
+                    </div>
+                    <div class="mt-2 flex items-center justify-center space-x-1">
+                        <button type="button" onclick="changeQty('family', -1)" class="w-6 h-6 sm:w-7 sm:h-7 bg-red-100 text-red-800 font-black rounded-xl text-xs hover:bg-red-200 transition">-</button>
+                        <input type="number" id="input-family" value="0" min="0" oninput="manualQty('family')" class="w-9 sm:w-11 text-center font-black text-xs sm:text-sm bg-white border border-gray-300 rounded-xl py-0.5 focus:outline-none focus:ring-1 focus:ring-red-500">
+                        <button type="button" onclick="changeQty('family', 1)" class="w-6 h-6 sm:w-7 sm:h-7 bg-red-700 text-white font-black rounded-xl text-xs hover:bg-red-800 transition">+</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FITUR 2: CATATAN KHUSUS KHUSUS DUKUNGAN MASAKAN -->
+            <div class="mt-2">
+                <input type="text" id="itemNotes" placeholder="Catatan Pesanan / Masakan (cth: Sambal dipisah, banyakan kriuk)" class="w-full text-xs p-2 sm:p-2.5 border border-gray-300 rounded-xl bg-gray-50 focus:ring-1 focus:ring-red-500">
+            </div>
+        </div>
+
+        <!-- FITUR 4: JADWAL & SLOT PENGAMBILAN -->
+        <div class="grid grid-cols-2 gap-2 text-xs font-bold border-t pt-3 border-gray-200">
+            <div>
+                <label class="block text-xs font-extrabold text-gray-700 mb-1">2. TANGGAL PENGAMBILAN</label>
+                <input type="date" id="pickupDate" class="w-full p-2 border border-gray-300 rounded-xl bg-gray-50 text-xs font-bold focus:ring-1 focus:ring-red-500">
+            </div>
+            <div>
+                <label class="block text-xs font-extrabold text-gray-700 mb-1">3. SLOT JAM</label>
+                <select id="pickupTime" class="w-full p-2 border border-gray-300 rounded-xl bg-gray-50 text-xs font-bold focus:ring-1 focus:ring-red-500">
+                    <option value="11:00 - 13:00">Slot Siang (11:00 - 13:00)</option>
+                    <option value="13:00 - 16:00">Slot Sore (13:00 - 16:00)</option>
+                    <option value="16:00 - 19:00">Slot Malam (16:00 - 19:00)</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- STEP 3: PENGIRIMAN & PEMBAYARAN -->
+        <div class="grid grid-cols-2 gap-2 text-xs font-bold border-t pt-3 border-gray-200">
+            <div>
+                <label class="block text-xs font-extrabold text-gray-700 mb-1">4. PENGIRIMAN</label>
+                <select id="fulfillment" onchange="toggleDeliveryOptions()" class="w-full p-2 border border-gray-300 rounded-xl bg-gray-50 text-xs font-bold focus:ring-1 focus:ring-red-500">
+                    <option value="Pickup">Pick-up (Ambil Sendiri)</option>
+                    <option value="GoSend">GoSend / Delivery</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-extrabold text-gray-700 mb-1">5. PEMBAYARAN</label>
+                <select id="payment" class="w-full p-2 border border-gray-300 rounded-xl bg-gray-50 text-xs font-bold focus:ring-1 focus:ring-red-500">
+                    <option value="BCA">Transfer BCA</option>
+                    <option id="optCash" value="Cash">Cash / Tunai</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- ALAMAT LENGKAP MODE DELIVERY (GOSEND) -->
+        <div id="addressBox" class="hidden space-y-2 border-t pt-3 border-gray-200 bg-red-50/60 p-3 rounded-2xl">
+            <label class="block text-xs font-extrabold text-red-800">ALAMAT PENGIRIMAN GOSEND</label>
+            <textarea id="custAddress" rows="2" placeholder="Alamat Lengkap (Nama Jalan, No. Rumah, RT/RW, Kelurahan) *" class="w-full text-xs p-2 border border-gray-300 rounded-xl focus:ring-1 focus:ring-red-500 bg-white"></textarea>
+            <input type="text" id="custNotes" placeholder="Patokan Lokasi (cth: Pagar Hitam seberang Indomaret)" class="w-full text-xs p-2 border border-gray-300 rounded-xl bg-white">
+        </div>
+
+        <!-- STEP 4: DATA PEMESAN -->
+        <div class="space-y-1.5 border-t pt-3 border-gray-200">
+            <label class="block text-xs font-extrabold text-gray-700">6. DATA PEMESAN</label>
+            <div class="grid grid-cols-2 gap-2">
+                <input type="text" id="custName" placeholder="Nama Pemesan *" class="w-full text-xs p-2 border border-gray-300 rounded-xl focus:ring-1 focus:ring-red-500">
+                <input type="tel" id="custPhone" placeholder="No. WA *" class="w-full text-xs p-2 border border-gray-300 rounded-xl focus:ring-1 focus:ring-red-500">
+            </div>
+        </div>
+
+        <!-- FOOTER & TOTAL -->
+        <div class="pt-3 border-t border-gray-200 flex items-center justify-between">
+            <div>
+                <span class="text-xs text-gray-500 font-bold block">TOTAL TAGIHAN</span>
+                <span id="grandTotal" class="text-xl sm:text-2xl font-black text-red-700">Rp 0</span>
+            </div>
+            <button type="button" onclick="processPOSOrder()" class="px-5 py-3 bg-red-700 hover:bg-red-800 text-white font-extrabold text-xs sm:text-sm rounded-2xl shadow-lg transition flex items-center space-x-2">
+                <i class="fa-brands fa-whatsapp text-base"></i>
+                <span>Proses Pesanan</span>
+            </button>
+        </div>
+
+    </div>
+
+    <!-- MODAL FITUR 3 & 6: RIWAYAT TRANSAKSI, VOID, & STATUS DAPUR -->
+    <div id="historyModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300 p-3 sm:p-4">
+        <div class="w-full max-w-xl bg-white rounded-3xl p-5 shadow-2xl space-y-4 text-gray-800 text-xs max-h-[90vh] flex flex-col">
+            <div class="flex items-center justify-between border-b pb-3">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-list-check text-gray-800 text-base"></i>
+                    <h3 class="font-extrabold text-base text-gray-900">Riwayat Pesanan & Status Dapur</h3>
+                </div>
+                <button type="button" onclick="closeHistoryModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div id="historyListContainer" class="space-y-2.5 overflow-y-auto pr-1 flex-1">
+                <!-- Data Riwayat Ditampilkan Via JS -->
+            </div>
+
+            <button type="button" onclick="closeHistoryModal()" class="w-full py-2.5 bg-gray-900 text-white font-bold rounded-xl text-center">Tutup</button>
+        </div>
+    </div>
+
+    <!-- MODAL FITUR 5: LAPORAN OMZET & EKSPOR EXCEL/CSV -->
+    <div id="reportsModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300 p-4">
+        <div class="w-full max-w-md bg-white rounded-3xl p-5 shadow-2xl space-y-4 text-gray-800 text-xs">
+            <div class="flex items-center justify-between border-b pb-3">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-chart-pie text-red-700 text-base"></i>
+                    <h3 class="font-extrabold text-base text-gray-900">Laporan Pendapatan Oink Rice</h3>
+                </div>
+                <button type="button" onclick="closeReportsModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-3 gap-1 bg-gray-100 p-1 rounded-xl text-center font-extrabold">
+                <button id="tabDaily" onclick="switchReportTab('daily')" class="py-1.5 rounded-lg bg-red-700 text-white shadow">Harian</button>
+                <button id="tabMonthly" onclick="switchReportTab('monthly')" class="py-1.5 rounded-lg text-gray-600">Bulanan</button>
+                <button id="tabYearly" onclick="switchReportTab('yearly')" class="py-1.5 rounded-lg text-gray-600">Tahunan</button>
+            </div>
+
+            <div class="p-3.5 bg-red-50 rounded-2xl border border-red-200 text-center space-y-1">
+                <span id="reportPeriodTitle" class="text-[11px] font-extrabold text-red-800 uppercase tracking-wider">Pendapatan Hari Ini</span>
+                <p id="reportTotalOmzet" class="text-2xl font-black text-red-700">Rp 0</p>
+                <p id="reportOrderCount" class="text-[10px] text-gray-500 font-bold">0 Transaksi Sukses</p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 text-[11px]">
+                <div class="p-2.5 bg-blue-50 rounded-xl border border-blue-100">
+                    <span class="text-blue-800 font-extrabold block">Transfer BCA</span>
+                    <span id="reportBcaTotal" class="font-black text-blue-900 text-sm">Rp 0</span>
+                </div>
+                <div class="p-2.5 bg-emerald-50 rounded-xl border border-emerald-100">
+                    <span class="text-emerald-800 font-extrabold block">Cash / Tunai</span>
+                    <span id="reportCashTotal" class="font-black text-emerald-900 text-sm">Rp 0</span>
+                </div>
+            </div>
+
+            <!-- FITUR 5: TOMBOL EKSPOR EXCEL CSV -->
+            <button type="button" onclick="exportToCSV()" class="w-full py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold rounded-xl text-center transition flex items-center justify-center space-x-2">
+                <i class="fa-solid fa-file-excel text-sm"></i>
+                <span>Download Laporan Excel (CSV)</span>
+            </button>
+
+            <button type="button" onclick="closeReportsModal()" class="w-full py-2 bg-gray-200 text-gray-800 font-bold rounded-xl text-center">Tutup</button>
+        </div>
+    </div>
+
+    <script>
+        const prices = { bowl: 40000, pack: 100000, family: 167000 };
+        const names = { bowl: 'Oink Bowl', pack: 'Oink Pack', family: 'Oink Family Pack 1 KG' };
+        let orderQty = { bowl: 0, pack: 0, family: 0 };
+        let currentReportTab = 'daily';
+
+        // Set default Tanggal ke Hari Ini
+        document.getElementById('pickupDate').valueAsDate = new Date();
+
+        function changeQty(type, delta) {
+            orderQty[type] = Math.max(0, orderQty[type] + delta);
+            document.getElementById(`input-${type}`).value = orderQty[type];
+            updatePOS();
+        }
+
+        function manualQty(type) {
+            const inputVal = parseInt(document.getElementById(`input-${type}`).value) || 0;
+            orderQty[type] = Math.max(0, inputVal);
+            updatePOS();
+        }
+
+        function resetItems() {
+            orderQty = { bowl: 0, pack: 0, family: 0 };
+            ['bowl', 'pack', 'family'].forEach(type => {
+                document.getElementById(`input-${type}`).value = 0;
+            });
+            document.getElementById('itemNotes').value = '';
+            updatePOS();
+        }
+
+        function updatePOS() {
+            let total = 0;
+            ['bowl', 'pack', 'family'].forEach(type => {
+                total += orderQty[type] * prices[type];
+            });
+            document.getElementById('grandTotal').innerText = `Rp ${total.toLocaleString('id-ID')}`;
+        }
+
+        function toggleDeliveryOptions() {
+            const fulfillment = document.getElementById('fulfillment').value;
+            const addressBox = document.getElementById('addressBox');
+            const optCash = document.getElementById('optCash');
+            const paymentSelect = document.getElementById('payment');
+
+            if (fulfillment === 'GoSend') {
+                addressBox.classList.remove('hidden');
+                optCash.disabled = true;
+                paymentSelect.value = 'BCA';
+            } else {
+                addressBox.classList.add('hidden');
+                optCash.disabled = false;
+            }
+        }
+
+        function processPOSOrder() {
+            const name = document.getElementById('custName').value.trim();
+            const phone = document.getElementById('custPhone').value.trim();
+            const fulfillment = document.getElementById('fulfillment').value;
+            const payment = document.getElementById('payment').value;
+            const address = document.getElementById('custAddress').value.trim();
+            const notes = document.getElementById('custNotes').value.trim();
+            const itemNotes = document.getElementById('itemNotes').value.trim();
+            const pickupDate = document.getElementById('pickupDate').value;
+            const pickupTime = document.getElementById('pickupTime').value;
+
+            let total = 0;
+            let itemSummary = '';
+            ['bowl', 'pack', 'family'].forEach(type => {
+                if (orderQty[type] > 0) {
+                    const subtotal = orderQty[type] * prices[type];
+                    total += subtotal;
+                    itemSummary += `• ${names[type]} (${orderQty[type]}x) = Rp ${subtotal.toLocaleString('id-ID')}\n`;
+                }
+            });
+
+            if (total === 0) { alert('Pilih minimal 1 menu!'); return; }
+            if (!name || !phone) { alert('Harap isi Nama & No WA Pemesan!'); return; }
+            if (fulfillment === 'GoSend' && !address) { alert('Harap isi Alamat Pengiriman GoSend!'); return; }
+
+            const orderId = `OINK-${Math.floor(1000 + Math.random() * 9000)}`;
+            const now = new Date();
+
+            const transaction = {
+                id: orderId,
+                name: name,
+                phone: phone,
+                itemsSummary: itemSummary.trim(),
+                itemNotes: itemNotes,
+                pickupDate: pickupDate,
+                pickupTime: pickupTime,
+                fulfillment: fulfillment,
+                total: total,
+                payment: payment,
+                status: 'Baru', // Baru -> Dimasak -> Siap
+                timestamp: now.getTime(),
+                dateStr: now.toISOString().split('T')[0],
+                monthStr: `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`,
+                yearStr: `${now.getFullYear()}`
+            };
+
+            let history = JSON.parse(localStorage.getItem('oink_pos_transactions') || '[]');
+            history.unshift(transaction);
+            localStorage.setItem('oink_pos_transactions', JSON.stringify(history));
+
+            let message = `*KASIR OINK RICE (#${orderId})* 🐷\n\n`;
+            message += `• Pemesan: ${name} (${phone})\n`;
+            message += `• Jadwal: ${pickupDate} (${pickupTime})\n`;
+            message += `• Pengiriman: ${fulfillment}\n`;
+            if (fulfillment === 'GoSend') {
+                message += `• Alamat: ${address}\n`;
+                if (notes) message += `• Patokan: ${notes}\n`;
+            }
+            message += `• Pembayaran: ${payment === 'BCA' ? 'Transfer BCA (044 148 5114 a.n. ALLEN PUTRA ER)' : 'Cash / Tunai'}\n\n`;
+            message += `*Rincian Menu:*\n${itemSummary}`;
+            if (itemNotes) message += `\n*Catatan Tambahan:* ${itemNotes}\n`;
+            message += `\n*TOTAL TAGIHAN: Rp ${total.toLocaleString('id-ID')}*`;
+
+            window.open(`https://wa.me/6285373018989?text=${encodeURIComponent(message)}`, '_blank');
+            
+            resetItems();
+            document.getElementById('custName').value = '';
+            document.getElementById('custPhone').value = '';
+            document.getElementById('custAddress').value = '';
+            document.getElementById('custNotes').value = '';
+        }
+
+        // FITUR 3 & 6: KELOLA RIWAYAT, STATUS DAPUR, & VOID
+        function openHistoryModal() {
+            renderHistoryList();
+            const modal = document.getElementById('historyModal');
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+        }
+
+        function closeHistoryModal() {
+            const modal = document.getElementById('historyModal');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+        }
+
+        function renderHistoryList() {
+            const history = JSON.parse(localStorage.getItem('oink_pos_transactions') || '[]');
+            const container = document.getElementById('historyListContainer');
+
+            if (history.length === 0) {
+                container.innerHTML = `<p class="text-center text-xs text-gray-400 py-6">Belum ada riwayat transaksi.</p>`;
+                return;
+            }
+
+            container.innerHTML = history.map((t, idx) => `
+                <div class="p-3 bg-gray-50 border border-gray-200 rounded-2xl space-y-2">
+                    <div class="flex justify-between items-center border-b pb-1.5">
+                        <div>
+                            <span class="font-black font-mono text-gray-900">#${t.id}</span>
+                            <span class="text-[10px] text-gray-500 ml-1.5">${t.dateStr} (${t.pickupTime})</span>
+                        </div>
+                        <span class="font-black text-red-700">Rp ${t.total.toLocaleString('id-ID')}</span>
+                    </div>
+
+                    <div class="text-[11px] text-gray-700">
+                        <p><b>Pemesan:</b> ${t.name} (${t.phone})</p>
+                        <p class="whitespace-pre-line text-gray-600 mt-1">${t.itemsSummary}</p>
+                        ${t.itemNotes ? `<p class="text-amber-800 font-bold bg-amber-50 p-1 rounded mt-1">Note: ${t.itemNotes}</p>` : ''}
+                    </div>
+
+                    <div class="flex items-center justify-between pt-1 border-t border-gray-200 text-[10px]">
+                        <!-- STATUS DAPUR TOGGLE -->
+                        <div class="flex items-center space-x-1">
+                            <span class="font-bold text-gray-500">Dapur:</span>
+                            <button onclick="updateKitchenStatus(${idx}, 'Baru')" class="px-2 py-0.5 rounded font-bold ${t.status === 'Baru' ? 'bg-red-700 text-white' : 'bg-gray-200 text-gray-600'}">Baru</button>
+                            <button onclick="updateKitchenStatus(${idx}, 'Dimasak')" class="px-2 py-0.5 rounded font-bold ${t.status === 'Dimasak' ? 'bg-amber-600 text-white' : 'bg-gray-200 text-gray-600'}">Dimasak</button>
+                            <button onclick="updateKitchenStatus(${idx}, 'Siap')" class="px-2 py-0.5 rounded font-bold ${t.status === 'Siap' ? 'bg-emerald-600 text-white' : 'bg-gray-200 text-gray-600'}">Siap</button>
+                        </div>
+
+                        <!-- VOID/HAPUS -->
+                        <button onclick="voidTransaction(${idx})" class="text-red-600 font-bold hover:underline">
+                            <i class="fa-solid fa-trash-can mr-0.5"></i> Hapus (Void)
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateKitchenStatus(index, newStatus) {
+            let history = JSON.parse(localStorage.getItem('oink_pos_transactions') || '[]');
+            history[index].status = newStatus;
+            localStorage.setItem('oink_pos_transactions', JSON.stringify(history));
+            renderHistoryList();
+        }
+
+        function voidTransaction(index) {
+            if (confirm('Yakin ingin menghapus / membatalkan transaksi ini dari laporan?')) {
+                let history = JSON.parse(localStorage.getItem('oink_pos_transactions') || '[]');
+                history.splice(index, 1);
+                localStorage.setItem('oink_pos_transactions', JSON.stringify(history));
+                renderHistoryList();
+            }
+        }
+
+        // FITUR 5: EKSPOR LAPORAN KE EXCEL (CSV)
+        function exportToCSV() {
+            const history = JSON.parse(localStorage.getItem('oink_pos_transactions') || '[]');
+            if (history.length === 0) { alert('Belum ada transaksi untuk diekspor!'); return; }
+
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "ID Pesanan,Tanggal,Nama Pemesan,No WA,Total Tagihan,Metode Pembayaran,Status Dapur\n";
+
+            history.forEach(t => {
+                csvContent += `"${t.id}","${t.dateStr}","${t.name}","${t.phone}",${t.total},"${t.payment}","${t.status}"\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `Laporan_Omzet_OinkRice_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // LOGIKA LAPORAN OMZET
+        function openReportsModal() {
+            const modal = document.getElementById('reportsModal');
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            switchReportTab(currentReportTab);
+        }
+
+        function closeReportsModal() {
+            const modal = document.getElementById('reportsModal');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+        }
+
+        function switchReportTab(tab) {
+            currentReportTab = tab;
+            ['daily', 'monthly', 'yearly'].forEach(t => {
+                const btn = document.getElementById(`tab${t.charAt(0).toUpperCase() + t.slice(1)}`);
+                if (t === tab) {
+                    btn.className = 'py-1.5 rounded-lg bg-red-700 text-white shadow';
+                } else {
+                    btn.className = 'py-1.5 rounded-lg text-gray-600';
+                }
+            });
+
+            calculateOmzet(tab);
+        }
+
+        function calculateOmzet(period) {
+            const history = JSON.parse(localStorage.getItem('oink_pos_transactions') || '[]');
+            const now = new Date();
+            
+            const todayStr = now.toISOString().split('T')[0];
+            const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+            const currentYearStr = `${now.getFullYear()}`;
+
+            let filtered = [];
+            let periodLabel = '';
+
+            if (period === 'daily') {
+                filtered = history.filter(t => t.dateStr === todayStr);
+                periodLabel = 'Pendapatan Hari Ini';
+            } else if (period === 'monthly') {
+                filtered = history.filter(t => t.monthStr === currentMonthStr);
+                periodLabel = 'Pendapatan Bulan Ini';
+            } else if (period === 'yearly') {
+                filtered = history.filter(t => t.yearStr === currentYearStr);
+                periodLabel = 'Pendapatan Tahun Ini';
+            }
+
+            let totalOmzet = 0;
+            let totalBca = 0;
+            let totalCash = 0;
+
+            filtered.forEach(t => {
+                totalOmzet += t.total;
+                if (t.payment === 'BCA') totalBca += t.total;
+                else totalCash += t.total;
+            });
+
+            document.getElementById('reportPeriodTitle').innerText = periodLabel;
+            document.getElementById('reportTotalOmzet').innerText = `Rp ${totalOmzet.toLocaleString('id-ID')}`;
+            document.getElementById('reportOrderCount').innerText = `${filtered.length} Transaksi Sukses`;
+            document.getElementById('reportBcaTotal').innerText = `Rp ${totalBca.toLocaleString('id-ID')}`;
+            document.getElementById('reportCashTotal').innerText = `Rp ${totalCash.toLocaleString('id-ID')}`;
+        }
+    </script>
+</body>
+</html>
